@@ -18,9 +18,12 @@
 #define ACCESSORY_MANUFACTURER ("Arduino Homekit")
 #define ACCESSORY_MODEL ("ESP8266")
 
-#define PIN_LED 4 // D4
+const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16};
+//const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16, 9};
+const int LED_PINS_LEN = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 
-int led_bri = 100;		//[0, 100]
+
+int led_bri = 50;		//[0, 100]
 bool led_power = false; // true or flase
 
 homekit_value_t led_on_get()
@@ -51,28 +54,6 @@ homekit_value_t light_bri_get()
 	return HOMEKIT_INT(led_bri);
 }
 
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
-homekit_characteristic_t serial_number = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, ACCESSORY_SN);
-homekit_characteristic_t led_on = HOMEKIT_CHARACTERISTIC_(ON, false,
-														  .getter = led_on_get,
-														  .setter = led_on_set);
-
-void led_update()
-{
-	int PWMRANGE = 255;
-	if (led_power)
-	{
-		int pwm = (int)(led_bri * 1.0 * PWMRANGE / 100.0 + 0.5f);
-		analogWrite(PIN_LED, pwm);
-		printf("ON  %3d (pwm: %4d of %d)\n", led_bri, pwm, PWMRANGE);
-	}
-	else
-	{
-		printf("OFF\n");
-		digitalWrite(PIN_LED, LOW);
-	}
-}
-
 void led_bri_set(homekit_value_t value)
 {
 	if (value.format != homekit_format_int)
@@ -81,6 +62,30 @@ void led_bri_set(homekit_value_t value)
 	}
 	led_bri = value.int_value;
 	led_update();
+}
+
+homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
+homekit_characteristic_t serial_number = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, ACCESSORY_SN);
+homekit_characteristic_t led_on = HOMEKIT_CHARACTERISTIC_(ON, false,
+														  .getter = led_on_get,
+														  .setter = led_on_set);
+
+void led_update()
+{
+	digitalWrite(9, LOW);
+	for (int i = 0; i < LED_PINS_LEN; i++)
+	{
+		if (i * 10 < led_bri && led_power)
+		{
+			printf("序号%d ON\n", i);
+			digitalWrite(LED_PINS[i], HIGH);
+		}
+		else
+		{
+			printf("序号%d OFF\n", i);
+			digitalWrite(LED_PINS[i], LOW);
+		}
+	}
 }
 
 void led_toggle()
@@ -129,6 +134,9 @@ homekit_server_config_t config = {
 
 void accessory_init()
 {
-	pinMode(PIN_LED, OUTPUT);
+	for (size_t i = 0; i < LED_PINS_LEN; i++)
+	{
+		pinMode(LED_PINS[i], OUTPUT);
+	}
 	led_update();
 }
