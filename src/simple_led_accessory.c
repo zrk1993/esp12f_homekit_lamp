@@ -18,7 +18,7 @@
 #define ACCESSORY_MANUFACTURER ("Arduino Homekit")
 #define ACCESSORY_MODEL ("ESP8266")
 
-const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16};
+const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16, 11};
 //const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16, 9};
 const int LED_PINS_LEN = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 
