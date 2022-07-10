@@ -1,35 +1,47 @@
-/*
- * simple_led.ino
- *
- * This accessory contains a builtin-led on ESP8266
- * Setup code: 111-11-111
- * The Flash-Button(D3, GPIO0) on NodeMCU:
- *
- *  Created on: 2020-02-08
- *      Author: Mixiaoxiao (Wang Bin)
- *  Edited on: 2020-03-01
- *      Edited by: euler271 (Jonas Linn)
- */
-
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-
 #include <arduino_homekit_server.h>
+#include "wifi_info.h"
 
-#define PL(s) Serial.println(s)
-#define P(s) Serial.print(s)
+#define SIMPLE_INFO(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);
 
-//D0 16 //led
-//D3  0 //flash button
-//D4  2 //led
+uint32_t next_heap_millis = 0;
 
-#define PIN_LED 16//D0
+void setup()
+{
+	Serial.begin(9600);
+	Serial.setRxBufferSize(32);
+	Serial.setDebugOutput(false);
 
-const char *ssid = "helloword";
-const char *password = "zxcvbnm8";
+	pinMode(BUILTIN_LED, OUTPUT);
+	wifi_connect();
 
-void blink_led(int interval, int count) {
-	for (int i = 0; i < count; i++) {
+	SIMPLE_INFO("");
+	SIMPLE_INFO("SketchSize: %d", ESP.getSketchSize());
+	SIMPLE_INFO("FreeSketchSpace: %d", ESP.getFreeSketchSpace());
+	SIMPLE_INFO("FlashChipSize: %d", ESP.getFlashChipSize());
+	SIMPLE_INFO("FlashChipRealSize: %d", ESP.getFlashChipRealSize());
+	SIMPLE_INFO("FlashChipSpeed: %d", ESP.getFlashChipSpeed());
+	SIMPLE_INFO("SdkVersion: %s", ESP.getSdkVersion());
+	SIMPLE_INFO("FullVersion: %s", ESP.getFullVersion().c_str());
+	SIMPLE_INFO("CpuFreq: %dMHz", ESP.getCpuFreqMHz());
+	SIMPLE_INFO("FreeHeap: %d", ESP.getFreeHeap());
+	SIMPLE_INFO("ResetInfo: %s", ESP.getResetInfo().c_str());
+	SIMPLE_INFO("ResetReason: %s", ESP.getResetReason().c_str());
+	INFO_HEAP();
+	homekit_setup();
+	INFO_HEAP();
+	blink_led(200, 3);
+}
+
+void loop()
+{
+	homekit_loop();
+}
+
+void blink_led(int interval, int count)
+{
+	for (int i = 0; i < count; i++)
+	{
 		builtinledSetStatus(true);
 		delay(interval);
 		builtinledSetStatus(false);
@@ -37,43 +49,9 @@ void blink_led(int interval, int count) {
 	}
 }
 
-void setup() {
-	Serial.begin(9600);
-	// Serial.setRxBufferSize(32);
-	// Serial.setDebugOutput(false);
-
-	pinMode(PIN_LED, OUTPUT);
-	WiFi.mode(WIFI_STA);
-	WiFi.persistent(false);
-	WiFi.disconnect(false);
-	WiFi.setAutoReconnect(true);
-	WiFi.begin(ssid, password);
-
-	printf("\n");
-	printf("SketchSize: %d B\n", ESP.getSketchSize());
-	printf("FreeSketchSpace: %d B\n", ESP.getFreeSketchSpace());
-	printf("FlashChipSize: %d B\n", ESP.getFlashChipSize());
-	printf("FlashChipRealSize: %d B\n", ESP.getFlashChipRealSize());
-	printf("FlashChipSpeed: %d\n", ESP.getFlashChipSpeed());
-	printf("SdkVersion: %s\n", ESP.getSdkVersion());
-	printf("FullVersion: %s\n", ESP.getFullVersion().c_str());
-	printf("CpuFreq: %dMHz\n", ESP.getCpuFreqMHz());
-	printf("FreeHeap: %d B\n", ESP.getFreeHeap());
-	printf("ResetInfo: %s\n", ESP.getResetInfo().c_str());
-	printf("ResetReason: %s\n", ESP.getResetReason().c_str());
-	DEBUG_HEAP();
-	homekit_setup();
-	DEBUG_HEAP();
-	blink_led(200, 3);
-}
-
-void loop() {
-	homekit_loop();
-	delay(5);
-}
-
-void builtinledSetStatus(bool on) {
-	digitalWrite(PIN_LED, on ? LOW : HIGH);
+void builtinledSetStatus(bool on)
+{
+	digitalWrite(BUILTIN_LED, on ? LOW : HIGH);
 }
 
 //==============================
@@ -85,22 +63,23 @@ extern "C" homekit_characteristic_t name;
 extern "C" void led_toggle();
 extern "C" void accessory_init();
 
-uint32_t next_heap_millis = 0;
-
-void homekit_setup() {
+void homekit_setup()
+{
 	accessory_init();
 	uint8_t mac[WL_MAC_ADDR_LENGTH];
 	WiFi.macAddress(mac);
-	int name_len = snprintf(NULL, 0, "%s_%02X%02X%02X", name.value.string_value, mac[3], mac[4], mac[5]);
-	char *name_value = (char*)malloc(name_len + 1);
-	snprintf(name_value, name_len + 1, "%s_%02X%02X%02X", name.value.string_value, mac[3], mac[4], mac[5]);
+	int name_len = snprintf(NULL, 0, "%s_%02X%02X%02X",
+							name.value.string_value, mac[3], mac[4], mac[5]);
+	char *name_value = (char *)malloc(name_len + 1);
+	snprintf(name_value, name_len + 1, "%s_%02X%02X%02X",
+			 name.value.string_value, mac[3], mac[4], mac[5]);
 	name.value = HOMEKIT_STRING_CPP(name_value);
 
 	arduino_homekit_setup(&config);
- 
 }
 
-void homekit_loop() {
+void homekit_loop()
+{
 	arduino_homekit_loop();
 	uint32_t time = millis();
 	if (time > next_heap_millis) {
