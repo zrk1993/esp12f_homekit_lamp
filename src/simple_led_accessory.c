@@ -13,16 +13,16 @@
 #include <stdio.h>
 #include <port.h>
 
-#define ACCESSORY_NAME ("ESP8266_LED3")
-#define ACCESSORY_SN ("SN_01234567") // SERIAL_NUMBER
-#define ACCESSORY_MANUFACTURER ("Arduino Homekit2")
-#define ACCESSORY_MODEL ("ESP82663")
+#define ACCESSORY_NAME ("ESP8266_LED")
+#define ACCESSORY_SN ("SN_0123456") // SERIAL_NUMBER
+#define ACCESSORY_MANUFACTURER ("Arduino Homekit")
+#define ACCESSORY_MODEL ("ESP82662")
 
 const int LED_PINS[] = {0, 4, 10, 14, 16};
 const int LED_PINS_LEN = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 
 
-int led_bri = 100;		//[0, 100]
+int led_bri = 10;		//[0, 100]
 bool led_power = true; // true or flase
 
 homekit_value_t led_on_get()
@@ -136,8 +136,8 @@ homekit_accessory_t *accessories[] =
 
 homekit_server_config_t config = {
 	.accessories = accessories,
-	.password = "111-11-112",
-	.setupId = "ABCDE"};
+	.password = "111-11-111",
+	.setupId = "ABCD"};
 
 void accessory_init()
 {
