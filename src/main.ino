@@ -2,9 +2,17 @@
 #include <arduino_homekit_server.h>
 #include "wifi_info.h"
 
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+
 #define SIMPLE_INFO(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);
 
 uint32_t next_heap_millis = 0;
+
+AsyncWebServer server(80);
+
+extern "C" void led_update_v(int);
 
 void setup()
 {
@@ -31,6 +39,20 @@ void setup()
 	homekit_setup();
 	INFO_HEAP();
 	blink_led(200, 3);
+
+	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+		request->send(200, "text/plain", "Hi! I am ESP8266 lamp.");
+	});
+	server.on("/lamp", HTTP_GET, [](AsyncWebServerRequest *request) {
+		if(request->hasArg("v")) {
+			String v = request->arg("v");
+			led_update_v(atoi(v.c_str()));
+			request->send(200, "text/plain", "Hi! I am ESP8266 lamp." + v);
+		}
+	});
+	AsyncElegantOTA.begin(&server);    // Start ElegantOTA
+	server.begin();
+	Serial.println("HTTP server started");
 }
 
 void loop()

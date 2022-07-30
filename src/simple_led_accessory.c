@@ -13,18 +13,17 @@
 #include <stdio.h>
 #include <port.h>
 
-#define ACCESSORY_NAME ("ESP8266_LED")
-#define ACCESSORY_SN ("SN_0123456") // SERIAL_NUMBER
-#define ACCESSORY_MANUFACTURER ("Arduino Homekit")
-#define ACCESSORY_MODEL ("ESP8266")
+#define ACCESSORY_NAME ("ESP8266_LED3")
+#define ACCESSORY_SN ("SN_01234567") // SERIAL_NUMBER
+#define ACCESSORY_MANUFACTURER ("Arduino Homekit2")
+#define ACCESSORY_MODEL ("ESP82663")
 
-const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16, 11};
-//const int LED_PINS[] = {0, 4, 5, 10, 12, 13, 14, 15, 16, 9};
+const int LED_PINS[] = {0, 4, 10, 14, 16};
 const int LED_PINS_LEN = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 
 
-int led_bri = 50;		//[0, 100]
-bool led_power = false; // true or flase
+int led_bri = 100;		//[0, 100]
+bool led_power = true; // true or flase
 
 homekit_value_t led_on_get()
 {
@@ -72,10 +71,18 @@ homekit_characteristic_t led_on = HOMEKIT_CHARACTERISTIC_(ON, false,
 
 void led_update()
 {
-	digitalWrite(9, LOW);
+	if (led_power) {
+		led_update_v(led_bri);
+	} else {
+		led_update_v(0);
+	}
+}
+
+void led_update_v(int v)
+{
 	for (int i = 0; i < LED_PINS_LEN; i++)
 	{
-		if (i * 10 < led_bri && led_power)
+		if (i * 20 < v)
 		{
 			printf("序号%d ON\n", i);
 			digitalWrite(LED_PINS[i], HIGH);
@@ -129,8 +136,8 @@ homekit_accessory_t *accessories[] =
 
 homekit_server_config_t config = {
 	.accessories = accessories,
-	.password = "111-11-111",
-	.setupId = "ABCD"};
+	.password = "111-11-112",
+	.setupId = "ABCDE"};
 
 void accessory_init()
 {
