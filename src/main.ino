@@ -4,6 +4,7 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include "wifi_info.h"
+#include "index.h"
 
 #define SIMPLE_INFO(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);
 
@@ -40,7 +41,9 @@ void setup()
 	blink_led(200, 3);
 
 	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-		request->send(200, "text/plain", "Hi! I am ESP8266 lamp.");
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", lamp_html_gz, lamp_html_gz_len);
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
 	});
 	server.on("/lamp", HTTP_GET, [](AsyncWebServerRequest *request) {
 		if(request->hasArg("v")) {

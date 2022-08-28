@@ -1,0 +1,7 @@
+1. 编写index.html
+2. gzip index.html
+3. filetoarray index.html.gz -o index.h
+4. 
+AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", lamp_html_gz, lamp_html_gz_len);
+response->addHeader("Content-Encoding", "gzip");
+request->send(response);

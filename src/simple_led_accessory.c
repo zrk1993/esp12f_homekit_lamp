@@ -22,7 +22,7 @@ const int LED_PINS[] = {0, 4, 10, 14, 16};
 const int LED_PINS_LEN = sizeof(LED_PINS) / sizeof(LED_PINS[0]);
 
 
-int led_bri = 10;		//[0, 100]
+int led_bri = 0;		//[0, 100]
 bool led_power = true; // true or flase
 
 homekit_value_t led_on_get()
