@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <string>
 #include <arduino_homekit_server.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -13,6 +14,7 @@ uint32_t next_heap_millis = 0;
 AsyncWebServer server(80);
 
 extern "C" void led_update_v(int);
+extern "C" int get_light_bri();
 
 void setup()
 {
@@ -44,6 +46,14 @@ void setup()
 		AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", lamp_html_gz, lamp_html_gz_len);
 		response->addHeader("Content-Encoding", "gzip");
 		request->send(response);
+	});
+	server.on("/led_bri", HTTP_GET, [](AsyncWebServerRequest *request) {
+		int i = get_light_bri();
+		char c[7];
+		itoa(i,c,10);
+		Serial.println(i);
+		Serial.println(c);
+		request->send(200, "text/plain", c);
 	});
 	server.on("/lamp", HTTP_GET, [](AsyncWebServerRequest *request) {
 		if(request->hasArg("v")) {

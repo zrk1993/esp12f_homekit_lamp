@@ -53,6 +53,11 @@ homekit_value_t light_bri_get()
 	return HOMEKIT_INT(led_bri);
 }
 
+int get_light_bri()
+{
+	return led_bri;
+}
+
 void led_bri_set(homekit_value_t value)
 {
 	if (value.format != homekit_format_int)
@@ -93,6 +98,7 @@ void led_update_v(int v)
 			digitalWrite(LED_PINS[i], LOW);
 		}
 	}
+	led_bri= v;
 }
 
 void led_toggle()

@@ -5,3 +5,6 @@
 AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", lamp_html_gz, lamp_html_gz_len);
 response->addHeader("Content-Encoding", "gzip");
 request->send(response);
+
+gcc filetoarray.c -o filetoarray
+./filetoarray index.html.gz > index.h

@@ -165,6 +165,10 @@
         change(per)
       }
     });
+    document.addEventListener("mouseup", function (e) {
+      self.mTouch = false
+      self.mDown = false
+    });
     document.addEventListener("mousemove", function (e) {
       if (self.mDown) {
         var moveX = e.clientX - self.beginClientX;
@@ -237,6 +241,17 @@
       alert("系统错误")
     })
   }, 100)
+
+  function getInitVal () {
+    fetch("/led_bri").then(function (res) {
+      return res.text()
+    }).then(function(v) {
+      up(v)
+    }).catch(function (e) {
+      alert("系统错误")
+    })
+  }
+  getInitVal()
 </script>
 
 </html>
